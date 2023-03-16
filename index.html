@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graverobber Defense</title>
+<style>
+    body {
+        margin:0;
+        overflow:hidden;
+    }
+
+    #toggle {
+        position:absolute;
+        bottom:40px;
+        left:40px;
+        z-index:1000;
+        height:25px;
+        width:140px;
+        font-size:16px;
+        font-family:"Courier New";
+        border-radius: 0;
+        background-color: #DDDDDD;
+    }
+
+    #units {
+        position:absolute;
+        bottom:40px;
+        left:180px;
+        z-index:1000;
+        height:25px;
+        width:80px;
+        font-size:16px;
+        font-family:"Courier New";
+        border-radius: 0;
+        background-color: #DDDDDD;
+    }
+
+    #farming {
+        position:absolute;
+        bottom:40px;
+        left:260px;
+        z-index:1000;
+        height:25px;
+        width:100px;
+        font-size:16px;
+        font-family:"Courier New";
+        border-radius: 0;
+        background-color: #DDDDDD;
+    }
+
+    #misc {
+        position:absolute;
+        bottom:40px;
+        left:360px;
+        z-index:1000;
+        height:25px;
+        width:80px;
+        font-size:16px;
+        font-family:"Courier New";
+        border-radius: 0;
+        background-color: #DDDDDD;
+    }
+	
+	#upgrades {
+        position:absolute;
+        bottom:40px;
+        left:440px;
+        z-index:1000;
+        height:25px;
+        width:100px;
+        font-size:16px;
+        font-family:"Courier New";
+        border-radius: 0;
+        background-color: #DDDDDD;
+    }
+	#abilitiesTab {
+        position:absolute;
+        bottom:40px;
+        left:540px;
+        z-index:1000;
+        height:25px;
+        width:100px;
+        font-size:16px;
+        font-family:"Courier New";
+        border-radius: 0;
+        background-color: #DDDDDD;
+    }
+</style>
+</head>
+<body>
+    <canvas></canvas>
+    
+    <button id="toggle" onclick="toggleDisplay()">Show/Close</button>
+    <button id="units" onclick="unitTab()">Traps</button>
+    <button id="farming" onclick="farmingTab()">Farming</button>
+    <button id="misc" onclick="miscTab()">Misc</button>
+	<button id="upgrades" onclick="upgradesTab()">Upgrades</button>
+    <script src="./perlin.js"></script>
+    <script src="./classes.js"></script>
+    <script src="./animate.js"></script>
+    <script src="./display.js"></script>
+    <script src="./movement.js"></script>
+    <script src="./main.js"></script>
+</body>
+</html>
