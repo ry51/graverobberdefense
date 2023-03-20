@@ -313,10 +313,8 @@ function animate() {
 			if (types == true && Math.random() < 0.5) spawnEnemy(3000 + 1000*spireBoost + Math.random()*(7000 - 1000*spireBoost), 3000 + 1000*spireBoost + Math.random()*(7000 - 1000*spireBoost), 30, (200 + time*0.6)*1.04**wave*3, (200 + time*0.6)*1.04**wave*3, 6, "#000000", 1, 40, 40, (6 + time*0.001)*1.01**wave/4, './assets/enemies/multienemy.png');
 			else spawnEnemy(3000 + 1000*spireBoost + Math.random()*(7000 - 1000*spireBoost), 3000 + 1000*spireBoost + Math.random()*(7000 - 1000*spireBoost), 30, (200 + time*0.6)*1.04**wave, (200 + time*0.6)*1.04**wave, 6, "#000000", 1, 40, 40, (6 + time*0.001)*1.01**wave, './assets/enemies/enemy.png');
 		}
-		if (winnable == true) wavetimer = 150*0.8**oc;
-		else if (wave > 150) wavetimer = 300*0.8**oc;
-		else if (wave > 100) wavetimer = 420*0.88**volcanounits*0.9**magmaunits*0.8**oc;
-		else wavetimer = 540*0.88**volcanounits*0.9**magmaunits*0.8**oc;
+	    	if (wave >= 30) wavetimer = 420;
+		else wavetimer = 660;
 		if (wave >= 51) {
 			for (let i = 0; i < 8; i++) {
 				resources[i] *= 1.05;
