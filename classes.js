@@ -205,15 +205,9 @@ class Unit extends Building {
     }
     
     shoot(target) {
-        /*
-        This code is to make the projectiles more accurate against a moving target, but somehow gets messed up when a speed-reducing ability is used or when enemies enter the range of a windspire
-        const enemydist = Math.hypot(target.x - this.m*50 + 25, target.y - this.n*50 + 25);
-        const targetspeed = target.velocity.x**2 + target.velocity.y**2;
-        const enemytime = targetspeed ? enemydist/targetspeed + 1 : 0;
-        const angle = Math.atan2((target.y + target.velocity.y*enemytime) - this.n*50 + 25, (target.x + target.velocity.x*enemytime) - this.m*50 + 25);
-        */
+
         const angle = Math.atan2(target.y - this.n*50 + 25, target.x- this.m*50 + 25);
-        const velocity = {x:Math.cos(angle)*Math.min(this.range*(1 + 0.2*beaconunits)/40 + wave/2, 50), y:Math.sin(angle)*Math.min(this.range*(1 + 0.2*beaconunits)/40 + + wave/2, 30)};
+        const velocity = {x:Math.cos(angle)*Math.min(this.range*(1 + 0.2*beaconunits)/40 + wave/2, 30), y:Math.sin(angle)*Math.min(this.range*(1 + 0.2*beaconunits)/40 + + wave/2, 30)};
         projectiles.push(new Projectile(this.m*50 - 25, this.n*50 - 25, this.projRadius, "#000000", velocity, 50, pierce, this.damage*this.supportBuffs, target, false));
     }
     
