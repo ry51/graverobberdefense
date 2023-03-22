@@ -658,7 +658,6 @@ function enemyDeath(enemy) {
 	resources[2] += Math.log(wave)/9*stoneNerds*totalResourceMultiplier;
 	resources[3] += Math.log(wave)/16*copperNerds*totalResourceMultiplier;
 	resources[4] += Math.log(wave)/25*titaniumNerds*totalResourceMultiplier;
-	if (enemy.radius == 40 || wave >= 150) resources[6] += Math.log(wave/32)/36*antimatterNerds*totalResourceMultiplier;
 	if (absp > 0) absp -= 30;
 	if (wave > 150 && enemy.radius == 150) enemies.length = 0;
 	if (wave > 100) enemyNova(enemy, Math.floor((Math.random()*wave/10) + 5), enemy.damage);
