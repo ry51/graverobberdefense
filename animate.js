@@ -981,11 +981,6 @@ function animate() {
 		httime--;
 		if (httime <= 0) ht = 1;
 	}
-	
-	if (wave > 100) {
-		resources[7] += 0.001;
-		resources[7] *= 1.0002;
-	}
 	resources[7] = Math.min(100 + chargeStorage, resources[7]);
 	
 	ctx.textAlign = "center";
