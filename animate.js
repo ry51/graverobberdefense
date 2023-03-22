@@ -291,7 +291,7 @@ function animate() {
     }
 
     
-	wavetimer -= ht;
+	if (pause % 2 == 0 && dead == false) wavetimer -= ht;
     if (wavetimer <= 0) {
 		if (wave % 50 != 0 && doom == true) {
 			if (wave > 150) {
