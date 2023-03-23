@@ -78,8 +78,8 @@ let abilityDisplay = 0;
 
 let onMouse = null;
 
-let player = new Player(x, y, 60, 'blue');
-let homestead = new Homestead(0, 0, homesteadmaxhp, homesteadmaxhp, './assets/misc/homestead.png');
+let player = new Player(x, y, 60, '#AAAAAA', 0, true, 20, 20, 2000, 2000, 20, 5, "#000000");
+let homestead = new Homestead(0, 0, homesteadmaxhp, homesteadmaxhp, './assets/misc/tomb0.png');
 
 let SPGBaseCost = [100, 0, 0, 0, 0, 0, 0, 0];
 let SACBaseCost = [0, 300, 600, 0, 0, 0, 0, 0];
@@ -178,6 +178,9 @@ let pressEff = 1;
 let double = false;
 let types = false;
 
+let tomblevel = 0;
+let healps = 0;
+
 let homesteadwarp = 1;
 
 let lootMultiplier = 1;
@@ -249,6 +252,11 @@ let b3 = new Upgrade("Belligerence III", "+30% damage from all sources.", [55000
 let b2 = new Upgrade("Belligerence II", "+30% damage from all sources.", [150000, 0, 0, 150000, 125000, 0, 0, 0], b3, './assets/upgrades/belligerence.png', "b");
 let b = new Upgrade("Belligerence I", "+30% damage from all sources.", [50000, 0, 0, 50000, 25000, 0, 0, 0], b2, './assets/upgrades/belligerence.png', "b");
 
+let t5 = new Upgrade("Valley of the Kings", "The last revolutionary tomb advancement. Grants another +3000 hp and 30 extra heal (100 total). In addition, due to the heavily guarded nature of the Valley of the Kings, the tomb's inherent attack from 'The Ka' gains 3x attack speed and 5x damage.", [0, 480000, 480000, 480000, 480000, 0, 0, 0], null, './assets/upgrades/tomb5.png', "t5");
+let t4 = new Upgrade("Great Pyramids", "Upgrade to the true pyramids! Ensures that you gain peak protection but also invites more graverobbers to steal stuff. Gain another +3000 hp and an additional 25 healed hp per second (70 total), but 1 more robber will appear each wave.", [0, 480000, 480000, 480000, 480000, 0, 0, 0], t5, './assets/upgrades/tomb4.png', "t4");
+let t3 = new Upgrade("Step Pyramids", "Upgrade to step pyramids to save space and gain increased preservation and protection. However, the incentive of wealth in the step pyramid will invite one more graverobber per wave. Gain another +3000 hp and an additional 20 healed hp per second (45 total).", [0, 90000, 90000, 90000, 90000, 0, 0, 0], t4, './assets/upgrades/tomb3.png', "t3");
+let t2 = new Upgrade("Mastabas", "A lined tomb that preserves bodies better and makes them immune to hungry animals. Gain another +3000 hp and an additional 15 healed hp per second (25 total).", [0, 12000, 12000, 12000, 12000, 0, 0, 0], t3, './assets/upgrades/tomb2.png', "t2");
+let t1 = new Upgrade("Pits in the Sand", "The most basic and primal tomb. Low body preservation rate but better than nothing. Tomb gains +3000 hp and heals 10 hp per second.", [0, 300, 300, 300, 300, 0, 0, 0], t2, './assets/upgrades/tomb1.png', "t1");
 
 mousePos = {x:0, y:0};
 tileSelect = {m:0, n:0};
@@ -261,132 +269,126 @@ addEventListener("mousemove", event => {
     else if (event.clientX > 180 && event.clientX < 220 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "units") description = "SAC";
     else if (event.clientX > 260 && event.clientX < 300 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "units") description = "YAC";
     else if (event.clientX > 340 && event.clientX < 380 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "units") description = "LT";
-	else if (event.clientX > 100 && event.clientX < 140 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100 && display == "units") description = "leader";
-	else if (event.clientX > 180 && event.clientX < 220 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100 && display == "units" && wave > 24) description = "staff";
-	else if (event.clientX > 260 && event.clientX < 300 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100 && display == "units" && wave > 150) description = "pat";
+    else if (event.clientX > 100 && event.clientX < 140 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100 && display == "units") description = "leader";
+    else if (event.clientX > 180 && event.clientX < 220 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100 && display == "units" && wave > 24) description = "staff";
+    else if (event.clientX > 260 && event.clientX < 300 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100 && display == "units" && wave > 150) description = "pat";
     else if (event.clientX > 100 && event.clientX < 140 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "farming") description = "farm";
-	else if (event.clientX > 180 && event.clientX < 220 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "farming" && wave > 20) description = "cave";
-	else if (event.clientX > 260 && event.clientX < 300 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "farming" && wave > 45) description = "compressor";
-	else if (event.clientX > 340 && event.clientX < 380 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "farming" && wave > 65) description = "mine";
-	else if (event.clientX > 100 && event.clientX < 140 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100 && display == "farming" && wave > 101) description = "pressurizer";
-	else if (event.clientX > 100 && event.clientX < 140 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "misc" && wave > 30 && spireWarped == false) description = "windspire";
-	else if (event.clientX > 260 && event.clientX < 300 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "misc" && wave > 90) description = "beacon";
-	else if (event.clientX > 180 && event.clientX < 220 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "misc" && wave > 50 && wave <= 150) {
-		if (campfirePrestige == 0) description = "campfire";
-		if (campfirePrestige == 1) description = "magma";
-		if (campfirePrestige == 2) description = "volcano";
-	}
+    else if (event.clientX > 180 && event.clientX < 220 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "farming" && wave > 20) description = "cave";
+    else if (event.clientX > 260 && event.clientX < 300 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "farming" && wave > 45) description = "compressor";
+    else if (event.clientX > 340 && event.clientX < 380 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "farming" && wave > 65) description = "mine";
+    else if (event.clientX > 100 && event.clientX < 140 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100 && display == "farming" && wave > 101) description = "pressurizer";
+    else if (event.clientX > 100 && event.clientX < 140 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "misc" && wave > 30 && spireWarped == false) description = "windspire";
+    else if (event.clientX > 260 && event.clientX < 300 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "misc" && wave > 90) description = "beacon";
+    else if (event.clientX > 180 && event.clientX < 220 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && display == "misc" && wave > 50 && wave <= 150) {
+        if (campfirePrestige == 0) description = "campfire";
+        if (campfirePrestige == 1) description = "magma";
+        if (campfirePrestige == 2) description = "volcano";
+    }
     else description = null;
-	
-	if (event.clientX > 440 && event.clientX < 840 && event.clientY < canvas.height - 67 && event.clientY > canvas.height - rows*50 - 67 && upgradeDisplay % 2 == 1) {
-		if (upgrades[upgradeY * 8 + upgradeX]) {
-			shownUpgrade = upgrades[upgradeY * 8 + upgradeX];
-		} else shownUpgrade = null;
-	} else shownUpgrade = null;
-	
-	if (event.clientX > 440 && event.clientX < 840 && event.clientY < canvas.height - 67 && event.clientY > canvas.height - 117 && abilityDisplay % 2 == 1) {
-		abilityIndex = Math.floor((event.clientX - 440)/50);
-	} else abilityIndex = null;
+    
+    if (event.clientX > 440 && event.clientX < 840 && event.clientY < canvas.height - 67 && event.clientY > canvas.height - rows*50 - 67 && upgradeDisplay % 2 == 1) {
+        if (upgrades[upgradeY * 8 + upgradeX]) {
+            shownUpgrade = upgrades[upgradeY * 8 + upgradeX];
+        } else shownUpgrade = null;
+    } else shownUpgrade = null;
+    
+    if (event.clientX > 440 && event.clientX < 840 && event.clientY < canvas.height - 67 && event.clientY > canvas.height - 117 && abilityDisplay % 2 == 1) {
+        abilityIndex = Math.floor((event.clientX - 440)/50);
+    } else abilityIndex = null;
 
-	if (event.clientX > canvas.width - 175 && event.clientX < canvas.width - 135 && event.clientY > 30 && event.clientY < 60 && meditationBoost > 0) infohover = "meditation";
-	else if (event.clientX > canvas.width - 175 && event.clientX < canvas.width - 135 && event.clientY > 80 && event.clientY < 110 && confidenceBoost > 0) infohover = "confidence";
-	else if (event.clientX > canvas.width - 175 && event.clientX < canvas.width - 135 && event.clientY > 130 && event.clientY < 160 && leechBoost == 3) infohover = "charge";
-	else if (event.clientX > canvas.width - 175 && event.clientX < canvas.width - 135 && event.clientY > 180 && event.clientY < 210 && experienceStacks > 0) infohover = "experience";
-	else if (event.clientX > canvas.width - 175 && event.clientX < canvas.width - 135 && event.clientY > 230 && event.clientY < 260 && lrb == true) infohover = "lrb";
-	else infohover = null;
+    if (event.clientX > canvas.width - 175 && event.clientX < canvas.width - 135 && event.clientY > 30 && event.clientY < 60 && meditationBoost > 0) infohover = "meditation";
+    else if (event.clientX > canvas.width - 175 && event.clientX < canvas.width - 135 && event.clientY > 80 && event.clientY < 110 && confidenceBoost > 0) infohover = "confidence";
+    else if (event.clientX > canvas.width - 175 && event.clientX < canvas.width - 135 && event.clientY > 130 && event.clientY < 160 && leechBoost == 3) infohover = "charge";
+    else if (event.clientX > canvas.width - 175 && event.clientX < canvas.width - 135 && event.clientY > 180 && event.clientY < 210 && experienceStacks > 0) infohover = "experience";
+    else if (event.clientX > canvas.width - 175 && event.clientX < canvas.width - 135 && event.clientY > 230 && event.clientY < 260 && lrb == true) infohover = "lrb";
+    else infohover = null;
 })
 
 
 
 addEventListener("click", event => {
-	if (wave == 50 && enemies.length == 0 && empowered == false) {
-		empowerdesc++;
-	}
-	if (wave == 100 && enemies.length == 0 && corrupted == false) {
-		corruptdesc++;
-	}
-	if (wave == 150 && enemies.length == 0 && apocalyptic == false) {
-		apocdesc++;
-	}
-	intropage++;
-	if (intropage == 4) {
-		pause++;	
-	}
-	if (event.clientX > 440 && event.clientX < 840 && event.clientY < canvas.height - 67 && event.clientY > canvas.height - rows*50 - 67 && upgradeDisplay % 2 == 1) {
-			if (upgrades[upgradeY * 8 + upgradeX] && upgrades[upgradeY * 8 + upgradeX].purchaseable()) {
-				upgrades[upgradeY * 8 + upgradeX].purchase();
-				upgrades[upgradeY * 8 + upgradeX].upgradeValues();
-				upgradesResearched++;
-				if (shownUpgrade.nextUpgrade != null) {
-					upgrades.push(shownUpgrade.nextUpgrade);
-				}
-				if (upgrades[upgradeY * 8 + upgradeX].name.includes("Reinforcements")) {
-					units.forEach((unit) => {
-						unit.health *= (1 + 1/healthBoost);	
-					})	
-					homestead.maxhealth += 5000;
-					homestead.health += 5000;
-				}
-				upgrades.splice(upgradeY * 8 + upgradeX, 1);
-				mousePos.x = canvas.width / 2;
-				mousePos.y = canvas.height / 2;
-				shownUpgrade == null;
-			}
-		}
-	if (abilityIndex != null) {
-		if (abilities[abilityIndex].purchaseable()) {
-			abilities[abilityIndex].purchase();
-			abilities[abilityIndex].use();
-		}
-	}
-	
-	
-	
+    if (wave == 50 && enemies.length == 0 && empowered == false) {
+        empowerdesc++;
+    }
+    if (wave == 100 && enemies.length == 0 && corrupted == false) {
+        corruptdesc++;
+    }
+    if (wave == 150 && enemies.length == 0 && apocalyptic == false) {
+        apocdesc++;
+    }
+    intropage++;
+    if (intropage == 4) {
+        pause++;    
+    }
+    if (event.clientX > 440 && event.clientX < 840 && event.clientY < canvas.height - 67 && event.clientY > canvas.height - rows*50 - 67 && upgradeDisplay % 2 == 1) {
+            if (upgrades[upgradeY * 8 + upgradeX] && upgrades[upgradeY * 8 + upgradeX].purchaseable()) {
+                upgrades[upgradeY * 8 + upgradeX].purchase();
+                upgrades[upgradeY * 8 + upgradeX].upgradeValues();
+                upgradesResearched++;
+                if (shownUpgrade.nextUpgrade != null) {
+                    upgrades.push(shownUpgrade.nextUpgrade);
+                }
+                if (upgrades[upgradeY * 8 + upgradeX].name.includes("Reinforcements")) {
+                    units.forEach((unit) => {
+                        unit.health *= (1 + 1/healthBoost); 
+                    })  
+                    homestead.maxhealth += 5000;
+                    homestead.health += 5000;
+                }
+                upgrades.splice(upgradeY * 8 + upgradeX, 1);
+                mousePos.x = canvas.width / 2;
+                mousePos.y = canvas.height / 2;
+                shownUpgrade == null;
+            }
+        }
+    
+    
+    
     if (display == "units" && event.clientX > 100 && event.clientX < 140 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180) onMouse = "SPG";
     if (display == "units" && event.clientX > 180 && event.clientX < 220 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180) onMouse = "SAC";
     if (display == "units" && event.clientX > 260 && event.clientX < 300 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180) onMouse = "YAC";
     if (display == "units" && event.clientX > 340 && event.clientX < 380 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180) onMouse = "LT";
     if (display == "units" && event.clientX > 100 && event.clientX < 140 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100) onMouse = "Leader";
-	if (display == "units" && event.clientX > 180 && event.clientX < 220 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100 && wave > 24) spawnStaff([1000000*3**staffunits, 0, 0, 0, 0, 0, 0, 0]);
-	if (display == "units" && event.clientX > 260 && event.clientX < 300 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100 && wave > 150) onMouse = "Pat";
+    if (display == "units" && event.clientX > 180 && event.clientX < 220 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100 && wave > 24) spawnStaff([1000000*3**staffunits, 0, 0, 0, 0, 0, 0, 0]);
+    if (display == "units" && event.clientX > 260 && event.clientX < 300 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100 && wave > 150) onMouse = "Pat";
     if (display == "farming" && event.clientX > 100 && event.clientX < 140 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180) onMouse = "Farm";
-	if (display == "farming" && event.clientX > 180 && event.clientX < 220 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && wave > 20) onMouse = "Cave";
-	if (display == "farming" && event.clientX > 260 && event.clientX < 300 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && wave > 45) onMouse = "Compressor";
-	if (display == "farming" && event.clientX > 340 && event.clientX < 380 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && wave > 65) onMouse = "Mine";
-	if (display == "farming" && event.clientX > 100 && event.clientX < 140 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100 && wave > 101) onMouse = "Pressurizer";
-	if (display == "misc" && event.clientX > 100 && event.clientX < 140 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && spireWarped == false && wave > 30) onMouse = "Windspire";
-	if (display == "misc" && event.clientX > 260 && event.clientX < 300 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && wave > 90) onMouse = "Beacon";
-	if (display == "misc" && event.clientX > 180 && event.clientX < 220 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && wave > 50) {
-		if (campfirePrestige == 0 && wave <= 150) onMouse = "Campfire";
-		if (campfirePrestige == 1 && wave <= 150) onMouse = "Magma";
-		if (campfirePrestige == 2 && wave <= 150) onMouse = "Volcano";
-		
-	}
+    if (display == "farming" && event.clientX > 180 && event.clientX < 220 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && wave > 20) onMouse = "Cave";
+    if (display == "farming" && event.clientX > 260 && event.clientX < 300 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && wave > 45) onMouse = "Compressor";
+    if (display == "farming" && event.clientX > 340 && event.clientX < 380 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && wave > 65) onMouse = "Mine";
+    if (display == "farming" && event.clientX > 100 && event.clientX < 140 && event.clientY > canvas.height - 140 && event.clientY < canvas.height - 100 && wave > 101) onMouse = "Pressurizer";
+    if (display == "misc" && event.clientX > 100 && event.clientX < 140 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && spireWarped == false && wave > 30) onMouse = "Windspire";
+    if (display == "misc" && event.clientX > 260 && event.clientX < 300 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && wave > 90) onMouse = "Beacon";
+    if (display == "misc" && event.clientX > 180 && event.clientX < 220 && event.clientY > canvas.height - 220 && event.clientY < canvas.height - 180 && wave > 50) {
+        if (campfirePrestige == 0 && wave <= 150) onMouse = "Campfire";
+        if (campfirePrestige == 1 && wave <= 150) onMouse = "Magma";
+        if (campfirePrestige == 2 && wave <= 150) onMouse = "Volcano";
+        
+    }
 
     if (player.x - canvas.width / 2 + mousePos.x >= 0 && player.y - canvas.height / 2 + mousePos.y >= 0 && player.x - canvas.width / 2 + mousePos.x <= 10000 && player.y - canvas.height / 2 + mousePos.y <= 10000) {
         if (onMouse == "SPG" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null) spawnSPG(tileSelect.m, tileSelect.n, [100*1.4**SPGunits, 0, 0, 0, 0, 0, 0, 0]);
         if (onMouse == "SAC" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null) spawnSAC(tileSelect.m, tileSelect.n, [0, 300*1.4**SACunits, 600*1.4**SACunits, 0, 0, 0, 0, 0]);
         if (onMouse == "YAC" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null) spawnYAC(tileSelect.m, tileSelect.n, [0, 0, 1200*1.4**YACunits, 400*1.4**YACunits, 0, 0, 0, 0]);
         if (onMouse == "LT" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null) spawnLT(tileSelect.m, tileSelect.n, [0, 0, 0, 0, 250*1.4**LTunits, 0, 0, 0]);
-		if (onMouse == "Leader" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null) spawnLeader(tileSelect.m, tileSelect.n, [20000*1.5**leaderunits, 0, 0, 0, 0, 0, 0, 0]);
-		if (onMouse == "Pat" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null) spawnPat(tileSelect.m, tileSelect.n, [1000000000000000000*10000**patunits, 0, 0, 0, 0, 0, 0, 0]);
+        if (onMouse == "Leader" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null) spawnLeader(tileSelect.m, tileSelect.n, [20000*1.5**leaderunits, 0, 0, 0, 0, 0, 0, 0]);
+        if (onMouse == "Pat" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null) spawnPat(tileSelect.m, tileSelect.n, [1000000000000000000*10000**patunits, 0, 0, 0, 0, 0, 0, 0]);
         if (onMouse == "Farm" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null) spawnFarm(tileSelect.m, tileSelect.n, 60, 50, [1000*1.2**farmunits, 0, 0, 0, 0, 0, 0, 0]);
-		if (onMouse == "Cave" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnCave(tileSelect.m, tileSelect.n, 60, 600, [20000*1.3**caveunits, 60000*1.3**caveunits, 30000*1.3**caveunits, 0, 0, 0, 0, 0]);
-		if (onMouse == "Compressor" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnCompressor(tileSelect.m, tileSelect.n, 60, 400, [0, 5000000*1.35**compressunits, 1000000*1.35**compressunits, 1000000*1.35**compressunits, 0, 0, 0, 0]);
-		if (onMouse == "Mine" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnMine(tileSelect.m, tileSelect.n, 60, 300, [0, 20000000*1.4**mineunits, 12000000*1.4**mineunits, 7000000*1.4**mineunits, 4000000*1.4**mineunits, 0, 0, 0]);
-		if (onMouse == "Pressurizer" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnPressurizer(tileSelect.m, tileSelect.n, 60, 240, [0, 0, 0, 40000000*1.45**pressurizerunits, 20000000*1.45**pressurizerunits, 9000000*1.45**pressurizerunits, 0, 0]);
-		if (onMouse == "Windspire" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null && spireWarped == false) spawnWindspire(tileSelect.m, tileSelect.n, 500, 80, [0, 330000*2.1**windspireunits, 880000*2.1**windspireunits, 0, 99000*2.1**windspireunits, 0, 0, 0]);
-		if (onMouse == "Campfire" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows && wave <= 150) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnCampfire(tileSelect.m, tileSelect.n, [0, 6000000*1.7**campfireunits, 1000000*1.7**campfireunits, 0, 0, 0, 0, 0]);
-		if (onMouse == "Magma" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows && wave <= 150) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnMagma(tileSelect.m, tileSelect.n, [0, 6000000*1.7**magmaunits, 1000000*1.7**magmaunits, 0, 0, 0, 0, 0]);
-		if (onMouse == "Volcano" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows && wave <= 150) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnVolcano(tileSelect.m, tileSelect.n, [0, 6000000*1.7**volcanounits, 1000000*1.7**volcanounits, 0, 0, 0, 0, 0]);
-		if (onMouse == "Beacon" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnBeacon(tileSelect.m, tileSelect.n, [0, 0, 40000000000*1.8**beaconunits, 0, 5000000000*1.8**beaconunits, 1000000000*1.8**beaconunits, 0, 0]);
+        if (onMouse == "Cave" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnCave(tileSelect.m, tileSelect.n, 60, 600, [20000*1.3**caveunits, 60000*1.3**caveunits, 30000*1.3**caveunits, 0, 0, 0, 0, 0]);
+        if (onMouse == "Compressor" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnCompressor(tileSelect.m, tileSelect.n, 60, 400, [0, 5000000*1.35**compressunits, 1000000*1.35**compressunits, 1000000*1.35**compressunits, 0, 0, 0, 0]);
+        if (onMouse == "Mine" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnMine(tileSelect.m, tileSelect.n, 60, 300, [0, 20000000*1.4**mineunits, 12000000*1.4**mineunits, 7000000*1.4**mineunits, 4000000*1.4**mineunits, 0, 0, 0]);
+        if (onMouse == "Pressurizer" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnPressurizer(tileSelect.m, tileSelect.n, 60, 240, [0, 0, 0, 40000000*1.45**pressurizerunits, 20000000*1.45**pressurizerunits, 9000000*1.45**pressurizerunits, 0, 0]);
+        if (onMouse == "Windspire" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null && spireWarped == false) spawnWindspire(tileSelect.m, tileSelect.n, 500, 80, [0, 330000*2.1**windspireunits, 880000*2.1**windspireunits, 0, 99000*2.1**windspireunits, 0, 0, 0]);
+        if (onMouse == "Campfire" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows && wave <= 150) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnCampfire(tileSelect.m, tileSelect.n, [0, 6000000*1.7**campfireunits, 1000000*1.7**campfireunits, 0, 0, 0, 0, 0]);
+        if (onMouse == "Magma" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows && wave <= 150) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnMagma(tileSelect.m, tileSelect.n, [0, 6000000*1.7**magmaunits, 1000000*1.7**magmaunits, 0, 0, 0, 0, 0]);
+        if (onMouse == "Volcano" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows && wave <= 150) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnVolcano(tileSelect.m, tileSelect.n, [0, 6000000*1.7**volcanounits, 1000000*1.7**volcanounits, 0, 0, 0, 0, 0]);
+        if (onMouse == "Beacon" && !(event.clientX < 450 && event.clientY > canvas.height - 300) && (event.clientY < canvas.height - 70 - 50*rows) && tiles[tileSelect.n][tileSelect.m] == null && wave > 20) spawnBeacon(tileSelect.m, tileSelect.n, [0, 0, 40000000000*1.8**beaconunits, 0, 5000000000*1.8**beaconunits, 1000000000*1.8**beaconunits, 0, 0]);
     }
     
 })
 
 addEventListener("keydown", event => {
     if (event.key == "Escape") onMouse = null;
-	if (event.keyCode == 32) pause++;
+    if (event.keyCode == 32) pause++;
 })
 
 var projectile = new Projectile(renderingPosX(player.x), renderingPosY(player.y), 5, 'black', {x:1, y:1}, true, pierce);
@@ -436,21 +438,21 @@ window.addEventListener("keyup", event => {
 window.onresize = event => { canvas.width = window.innerWidth; canvas.height = window.innerHeight };
 
 function getColor(value) {
-	if (value < 0.04) {
-		return "#BA9A66";
-	} else if (value < 0.08) {
-		return "#E2AE82";
-	} else if (value < 0.14) {
-		return "#A57F54";
-	} else if (value < 0.22) {
-		return "#C67936";
-	} else if (value < 0.35) {
-		return "#6B3E2E";
-	} else if (value < 0.45) {
-		return "#633812";
-	} else {
-		return "#3F230A";
-	}
+    if (value < 0.04) {
+        return "#BA9A66";
+    } else if (value < 0.08) {
+        return "#E2AE82";
+    } else if (value < 0.14) {
+        return "#A57F54";
+    } else if (value < 0.22) {
+        return "#C67936";
+    } else if (value < 0.35) {
+        return "#6B3E2E";
+    } else if (value < 0.45) {
+        return "#633812";
+    } else {
+        return "#3F230A";
+    }
 
     
 }
@@ -535,9 +537,9 @@ function spawnPat(m, n, cost) {
 function spawnStaff(cost) {
     if (priceCheck(cost)) {
         staffunits++;
-		if (a4 == true) strengthunits++;
-		homestead.maxhealth += 2000;
-		homestead.health += 2000;
+        if (a4 == true) strengthunits++;
+        homestead.maxhealth += 2000;
+        homestead.health += 2000;
     }
 }
 
@@ -583,16 +585,16 @@ function spawnPressurizer(m, n, pressrate, press, cost) {
 
 function spawnWindspire(m, n, range, slowdown, cost) {
     if (priceCheck(cost)) {
-		units.push(new Windspire(m, n, range, slowdown, cost)); 
+        units.push(new Windspire(m, n, range, slowdown, cost)); 
         tiles[n][m] = "Windspire";
         windspireunits++;
-		warpspired.description = `Sacrifice the ability to purchase windspires in order to enchant the homestead with wind. The homestead transforms into a massive windspire whose strength is determined by the number of windspires purchased before this upgrade. At your current amount of ${windspireunits} windspires, you will attain a ${Math.floor(100*(1 - 1/Math.log(windspireunits*2)))}% global slowdown and damage reduction.`;
+        warpspired.description = `Sacrifice the ability to purchase windspires in order to enchant the homestead with wind. The homestead transforms into a massive windspire whose strength is determined by the number of windspires purchased before this upgrade. At your current amount of ${windspireunits} windspires, you will attain a ${Math.floor(100*(1 - 1/Math.log(windspireunits*2)))}% global slowdown and damage reduction.`;
     }
 }
 
 function spawnCampfire(m, n, cost) {
     if (priceCheck(cost)) {
-		units.push(new Campfire(m, n, cost)); 
+        units.push(new Campfire(m, n, cost)); 
         tiles[n][m] = "Campfire";
         campfireunits++;
     }
@@ -600,25 +602,25 @@ function spawnCampfire(m, n, cost) {
 
 function spawnMagma(m, n, cost) {
     if (priceCheck(cost)) {
-		units.push(new Magma(m, n, cost)); 
+        units.push(new Magma(m, n, cost)); 
         tiles[n][m] = "Magma";
         magmaunits++;
-		fireLootBuff += 0.03;
+        fireLootBuff += 0.03;
     }
 }
 
 function spawnVolcano(m, n, cost) {
     if (priceCheck(cost)) {
-		units.push(new Volcano(m, n, cost)); 
+        units.push(new Volcano(m, n, cost)); 
         tiles[n][m] = "Volcano";
         volcanounits++;
-		fireLootBuff += 0.04;
+        fireLootBuff += 0.04;
     }
 }
 
 function spawnBeacon(m, n, cost) {
     if (priceCheck(cost)) {
-		units.push(new Beacon(m, n, cost)); 
+        units.push(new Beacon(m, n, cost)); 
         tiles[n][m] = "Beacon";
         beaconunits++;
     }
@@ -632,146 +634,148 @@ for (let i = 7; i < 10; i++) {
 farmunits = 0;
 
 function priceCheck(cost) {
-	let purchaseable = true;
-	for (let i = 0; i < 8; i++) {
-		if (resources[i] < cost[i]) {
-			purchaseable = false;
-		}
-	}
-	if (purchaseable == false) {
-		return false;
-	} else {
-		for (let i = 0; i < 8; i++) {
-			resources[i] -= cost[i]
-		}
-		return true;
-	}
+    let purchaseable = true;
+    for (let i = 0; i < 8; i++) {
+        if (resources[i] < cost[i]) {
+            purchaseable = false;
+        }
+    }
+    if (purchaseable == false) {
+        return false;
+    } else {
+        for (let i = 0; i < 8; i++) {
+            resources[i] -= cost[i]
+        }
+        return true;
+    }
 }
 
 function enemyDeath(enemy) {
-	homestead.health += 100*leechBoost;
-	homestead.health = Math.min(homestead.health, homestead.maxhealth);
-	enemiesKilled++;
-	let totalResourceMultiplier =  Math.log(wave)*enemy.maxhealth*globalResourceBoost*(1 + wave/100*eng)*fireLootBuff*1.05**eva*lootMultiplier
+    homestead.health += 100*leechBoost;
+    homestead.health = Math.min(homestead.health, homestead.maxhealth);
+    enemiesKilled++;
+    let totalResourceMultiplier =  Math.log(wave)*enemy.maxhealth*globalResourceBoost*(1 + wave/100*eng)*fireLootBuff*1.05**eva*lootMultiplier
     resources[0] += Math.log(wave)*(1 + farmBoost/4)*foodNerds*totalResourceMultiplier;
-	resources[1] += Math.log(wave)/4*(1 + lumberBoost*0.55)*woodNerds*totalResourceMultiplier;
-	resources[2] += Math.log(wave)/9*stoneNerds*totalResourceMultiplier;
-	resources[3] += Math.log(wave)/16*copperNerds*totalResourceMultiplier;
-	resources[4] += Math.log(wave)/25*titaniumNerds*totalResourceMultiplier;
-	if (absp > 0) absp -= 30;
-	if (wave > 150 && enemy.radius == 150) enemies.length = 0;
-	if (wave > 100) enemyNova(enemy, Math.floor((Math.random()*wave/10) + 5), enemy.damage);
+    resources[1] += Math.log(wave)/4*(1 + lumberBoost*0.55)*woodNerds*totalResourceMultiplier;
+    resources[2] += Math.log(wave)/9*stoneNerds*totalResourceMultiplier;
+    resources[3] += Math.log(wave)/16*copperNerds*totalResourceMultiplier;
+    resources[4] += Math.log(wave)/25*titaniumNerds*totalResourceMultiplier;
+    if (absp > 0) absp -= 30;
+    if (wave > 150 && enemy.radius == 150) enemies.length = 0;
+    if (wave > 100) enemyNova(enemy, Math.floor((Math.random()*wave/10) + 5), enemy.damage);
 }
 
 function getAdjacent(unit) {
-	let m = unit.m;
-	let n = unit.n;
-	let adjacentTiles = [];
-	for (let i = m-1; i < m+2; i++) {
-		for (let j = n-1; j < n+2; j++) {
-			adjacentTiles.push(tiles[j][i]);
-		}
-	}
-	adjacentTiles.splice(4, 1);
-	return adjacentTiles;
+    let m = unit.m;
+    let n = unit.n;
+    let adjacentTiles = [];
+    for (let i = m-1; i < m+2; i++) {
+        for (let j = n-1; j < n+2; j++) {
+            adjacentTiles.push(tiles[j][i]);
+        }
+    }
+    adjacentTiles.splice(4, 1);
+    return adjacentTiles;
 }
 
 function applyYACBuffs(tile, adjacentTiles) {
-	let YACstacks = 0;
-	for (let i = 0; i < 8; i++) {
-		if (adjacentTiles[i] == "YAC") YACstacks++;
-	}
-	return YACstacks;
+    let YACstacks = 0;
+    for (let i = 0; i < 8; i++) {
+        if (adjacentTiles[i] == "YAC") YACstacks++;
+    }
+    return YACstacks;
 }
 
 function applyLTBuffs(tile, adjacentTiles) {
-	let LTstacks = 0;
-	for (let i = 0; i < 8; i++) {
-		if (adjacentTiles[i] == "LT") LTstacks++;
-	}
-	return LTstacks;
+    let LTstacks = 0;
+    for (let i = 0; i < 8; i++) {
+        if (adjacentTiles[i] == "LT") LTstacks++;
+    }
+    return LTstacks;
 }
 
 function applyLeaderBuffs(tile, adjacentTiles) {
-	let Leaderstacks = 0;
-	for (let i = 0; i < 8; i++) {
-		if (adjacentTiles[i] == "Leader") Leaderstacks++;
-	}
-	return Leaderstacks;
+    let Leaderstacks = 0;
+    for (let i = 0; i < 8; i++) {
+        if (adjacentTiles[i] == "Leader") Leaderstacks++;
+    }
+    return Leaderstacks;
 }
 
 function applyCampfireBuffs(tile, adjacentTiles) {
-	let Firestacks = 0;
-	for (let i = 0; i < 8; i++) {
-		if (adjacentTiles[i] == "Campfire") Firestacks++;
-	}
-	return Firestacks;
+    let Firestacks = 0;
+    for (let i = 0; i < 8; i++) {
+        if (adjacentTiles[i] == "Campfire") Firestacks++;
+    }
+    return Firestacks;
 }
 
 function applyMagmaBuffs(tile, adjacentTiles) {
-	let Magmastacks = 0;
-	for (let i = 0; i < 8; i++) {
-		if (adjacentTiles[i] == "Magma") Magmastacks++;
-	}
-	return Magmastacks;
+    let Magmastacks = 0;
+    for (let i = 0; i < 8; i++) {
+        if (adjacentTiles[i] == "Magma") Magmastacks++;
+    }
+    return Magmastacks;
 }
 
 function simplify(amount) {
 	if (amount < 10000) return Math.floor(amount);
-	for (let j = 10; j >= 0; j--) {
+	for (let j = 100; j >= 0; j--) {
 		let placeValue = 10**(3*(j + 1));
 		if (amount >= placeValue) {
 			let magnitude = Math.floor(Math.log10(amount));
 			let firstdigit = Math.floor(amount/(10**magnitude));
-			let seconddigit = Math.floor((amount%(10**magnitude))/(10**(magnitude-1)));
-			let thirddigit = Math.floor((amount%(10**(magnitude-1)))/(10**(magnitude-2)));
-			if (magnitude % 3 == 0) return `${firstdigit}.${seconddigit}${thirddigit}${values[j]}`;
-			else if (magnitude % 3 == 1) return `${firstdigit}${seconddigit}.${thirddigit}${values[j]}`;
-			else return `${firstdigit}${seconddigit}${thirddigit}${values[j]}`;
+			let seconddigit = Math.floor((amount%(10**magnitude))/(10**(magnitude - 1)));
+			let thirddigit = Math.floor((amount%(10**(magnitude-1)))/(10**(magnitude - 2)));
+			if (amount%(10**magnitude) == 0 && magnitude % 3 == 0) return `${firstdigit}${values[j]}`;
+			else if (amount%(10**(magnitude - 1)) == 0 && magnitude % 3 == 1) return `${firstdigit}${seconddigit}${values[j]}`;
+			else {
+				if (magnitude % 3 == 0) return `${firstdigit}.${seconddigit}${thirddigit}${values[j]}`;
+				else if (magnitude % 3 == 1) return `${firstdigit}${seconddigit}.${thirddigit}${values[j]}`;
+				else return `${firstdigit}${seconddigit}${thirddigit}${values[j]}`;
+			}
 		}
 	}
 }
 
 function displayCosts(baseCost, costMultiplier, levels) {
-	let displayableCost = [];
-	for (let i = 0; i < 8; i++) {
-		displayableCost.push(baseCost[i]*(costMultiplier**levels));
-	}
-	let resourceCounter = 0;
-	for (let i = 0; i < 8; i++) {
-		if (displayableCost[i] != 0) {
-			ctx.drawImage(getImage(resourceImages[i]), 50, canvas.height - 505 + 30*resourceCounter, 30, 30);
-			ctx.fillText(simplify(Math.floor(displayableCost[i])), 90, canvas.height - 478 + 30*resourceCounter);
-			resourceCounter++;
-		}
-	}
+    let displayableCost = [];
+    for (let i = 0; i < 8; i++) {
+        displayableCost.push(baseCost[i]*(costMultiplier**levels));
+    }
+    let resourceCounter = 0;
+    for (let i = 0; i < 8; i++) {
+        if (displayableCost[i] != 0) {
+            ctx.drawImage(getImage(resourceImages[i]), 50, canvas.height - 505 + 30*resourceCounter, 30, 30);
+            ctx.fillText(simplify(Math.floor(displayableCost[i])), 90, canvas.height - 478 + 30*resourceCounter);
+            resourceCounter++;
+        }
+    }
 }
 
 function displayUpgradeCosts(cost) {
-	let resourceCounter = 0;
-	for (let i = 0; i < 8; i++) {
-		if (cost[i] != 0) {
-			ctx.drawImage(getImage(resourceImages[i]), 450, canvas.height - rows*50 - 415 + 20*resourceCounter, 20, 20);
-			ctx.fillText(simplify(Math.floor(cost[i])), 480, canvas.height - rows*50 - 395 + 20*resourceCounter);
-			resourceCounter++;
-		}
-	}
+    let resourceCounter = 0;
+    for (let i = 0; i < 8; i++) {
+        if (cost[i] != 0) {
+            ctx.drawImage(getImage(resourceImages[i]), 450, canvas.height - rows*50 - 415 + 20*resourceCounter, 20, 20);
+            ctx.fillText(simplify(Math.floor(cost[i])), 480, canvas.height - rows*50 - 395 + 20*resourceCounter);
+            resourceCounter++;
+        }
+    }
 }
 
 function enemyNova(enemy, projCount, damage) {
-	for (let i = 0; i < projCount; i++) {
-		let projV = {x:Math.cos(Math.PI*2*i/projCount)*10, y:Math.sin(Math.PI*2*i/projCount)*10}
-		enemyprojectiles.push(new enemyProjectile(enemy.x, enemy.y, enemy.projradius, "#660000", projV, 1, damage, false));
-	}
+    for (let i = 0; i < projCount; i++) {
+        let projV = {x:Math.cos(Math.PI*2*i/projCount)*10, y:Math.sin(Math.PI*2*i/projCount)*10}
+        enemyprojectiles.push(new enemyProjectile(enemy.x, enemy.y, enemy.projradius, "#660000", projV, 1, damage, false));
+    }
 }
 
 function appendUpgrade(upgrade) {
-	upgrades.push(upgrade);
-	upgradechecked = false;
+    upgrades.push(upgrade);
+    upgradechecked = false;
 }
 
 resources = [500, 0, 0, 0, 0, 0, 0, 0];
 
 animate();
-
-

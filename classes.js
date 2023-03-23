@@ -1,9 +1,18 @@
 class Player {
-    constructor(x, y, radius, color) {
+    constructor(x, y, radius, color, state, auto, reloadTime, maxReloadTime, rocketReloadTime, xbowReloadTime, damage, projSize, projColour) {
         this.x = x;
         this.y = y;
         this.radius = radius;
         this.color = color;
+        this.state = state;
+        this.auto = auto;
+        this.reloadTime = reloadTime;
+        this.maxReloadTime = maxReloadTime;
+        this.rocketReloadTime = rocketReloadTime;
+        this.xbowReloadTime = xbowReloadTime;
+        this.damage = damage;
+        this.projSize = projSize;
+        this.projColour = projColour;
     }
 
     draw() {
@@ -16,6 +25,30 @@ class Player {
         ctx.fillStyle = "#AAAAAA";
         ctx.fill()
     }
+
+    shoot(target) {
+        const angle = Math.atan2(target.y - this.y, target.x- this.x);
+        const velocity = {x:Math.cos(angle)*Math.min(15 + wave/3, 30), y:Math.sin(angle)*Math.min(15 + wave/3, 30)};
+        projectiles.push(new Projectile(this.x, this.y, this.projSize, this.projColour, velocity, 50, 1, this.damage + wave, target, 1));
+    }
+
+    update() {
+        if (pause % 2 == 0) this.reloadTime -= 1;
+        player.draw();
+        let mindist = 5000;
+        let closestenemy = null;
+        for (let enemy of enemies) {
+            let distance = Math.hypot(this.x - enemy.x, this.y - enemy.y);
+            if (distance < mindist) {
+                mindist = distance;
+                closestenemy = enemy;
+            }
+        }
+        if (closestenemy && this.reloadTime <= 0) {
+            this.shoot(closestenemy);
+            this.reloadTime = this.maxReloadTime;
+        }
+    }
 }
 
 class Projectile {
@@ -27,8 +60,8 @@ class Projectile {
         this.velocity = velocity;
         this.lifeTime = lifeTime;
         this.pierce = pierce;
-		this.damage = damage;
-		this.target = target;
+        this.damage = damage;
+        this.target = target;
         this.isCB = isCB;
     }
 
@@ -164,7 +197,7 @@ class enemyProjectile {
         this.draw()
         this.x = this.x + this.velocity.x;
         this.y = this.y + this.velocity.y;
-		this.lifeTime--;
+        this.lifeTime--;
     }
 }
 
@@ -201,21 +234,27 @@ class Unit extends Building {
         this.color = color;
         this.projRadius = projRadius;
         this.cost = cost;
-		this.supportBuffs = supportBuffs;
+        this.supportBuffs = supportBuffs;
     }
     
     shoot(target) {
-
+        /*
+        This code is to make the projectiles more accurate against a moving target, but somehow gets messed up when a speed-reducing ability is used or when enemies enter the range of a windspire
+        const enemydist = Math.hypot(target.x - this.m*50 + 25, target.y - this.n*50 + 25);
+        const targetspeed = target.velocity.x**2 + target.velocity.y**2;
+        const enemytime = targetspeed ? enemydist/targetspeed + 1 : 0;
+        const angle = Math.atan2((target.y + target.velocity.y*enemytime) - this.n*50 + 25, (target.x + target.velocity.x*enemytime) - this.m*50 + 25);
+        */
         const angle = Math.atan2(target.y - this.n*50 + 25, target.x- this.m*50 + 25);
-        const velocity = {x:Math.cos(angle)*Math.min(this.range*(1 + 0.2*beaconunits)/40 + wave/2, 30), y:Math.sin(angle)*Math.min(this.range*(1 + 0.2*beaconunits)/40 + + wave/2, 30)};
+        const velocity = {x:Math.cos(angle)*Math.min(this.range*(1 + 0.2*beaconunits)/40 + wave/2, 50), y:Math.sin(angle)*Math.min(this.range*(1 + 0.2*beaconunits)/40 + + wave/2, 30)};
         projectiles.push(new Projectile(this.m*50 - 25, this.n*50 - 25, this.projRadius, "#000000", velocity, 50, pierce, this.damage*this.supportBuffs, target, false));
     }
     
     update() {
         if (pause % 2 === 0) {
             if (wave <= 50) this.reloadTime -= (1 + 0.1*oc);
-			else if (wave <= 200 && chilled == 0.01) this.reloadTime -= 0.0625*(1 + 0.1*oc);
-			else if (wave <= 200) this.reloadTime -= 0.25*(1 + 0.1*oc);
+            else if (wave <= 200 && chilled == 0.01) this.reloadTime -= 0.0625*(1 + 0.1*oc);
+            else if (wave <= 200) this.reloadTime -= 0.25*(1 + 0.1*oc);
         }
         let mindist = 10000;
         let closestenemy = null;
@@ -304,17 +343,17 @@ class Farm extends Building {
 }
 
 class Cave extends Building {
-	constructor(m, n, caverate, maxCaverate, excavation, cost) {
-		super(m, n, 'Cave', 7000*(1 + healthBoost), "#666666")
+    constructor(m, n, caverate, maxCaverate, excavation, cost) {
+        super(m, n, 'Cave', 7000*(1 + healthBoost), "#666666")
         this.m = m;
         this.n = n;
         this.caverate = caverate;
         this.maxCaverate = maxCaverate;
         this.excavation = excavation;
         this.cost = cost;
-	}
-	
-	update() {
+    }
+    
+    update() {
         if (pause % 2 == 0) {
             this.caverate--;
             if (this.caverate <= 0) {
@@ -326,17 +365,17 @@ class Cave extends Building {
 }
 
 class Compressor extends Building {
-	constructor(m, n, compressrate, maxCompressrate, compression, cost) {
-		super(m, n, 'Compressor', 20000*(1 + healthBoost), "#888844")
+    constructor(m, n, compressrate, maxCompressrate, compression, cost) {
+        super(m, n, 'Compressor', 20000*(1 + healthBoost), "#888844")
         this.m = m;
         this.n = n;
         this.compressrate = compressrate;
         this.maxCompressrate = maxCompressrate;
         this.compression = compression;
         this.cost = cost;
-	}
-	
-	update() {
+    }
+    
+    update() {
         if (pause % 2 == 0) {
             this.compressrate--;
             if (this.compressrate <= 0) {
@@ -348,17 +387,17 @@ class Compressor extends Building {
 }
 
 class Mine extends Building {
-	constructor(m, n, minerate, maxMinerate, load, cost) {
-		super(m, n, 'Mine', 25000*(1 + healthBoost), "#3D251E")
+    constructor(m, n, minerate, maxMinerate, load, cost) {
+        super(m, n, 'Mine', 25000*(1 + healthBoost), "#3D251E")
         this.m = m;
         this.n = n;
         this.minerate = minerate;
         this.maxMinerate = maxMinerate;
         this.load = load;
         this.cost = cost;
-	}
-	
-	update() {
+    }
+    
+    update() {
         if (pause % 2 == 0) {
             this.minerate--;
             if (this.minerate <= 0) {
@@ -370,17 +409,17 @@ class Mine extends Building {
 }
 
 class Pressurizer extends Building {
-	constructor(m, n, pressrate, maxPressrate, press, cost) {
-		super(m, n, 'Mine', 25000*(1 + healthBoost), "#BEC2CB")
+    constructor(m, n, pressrate, maxPressrate, press, cost) {
+        super(m, n, 'Mine', 25000*(1 + healthBoost), "#BEC2CB")
         this.m = m;
         this.n = n;
         this.pressrate = pressrate;
         this.maxPressrate = maxPressrate;
         this.press = press;
         this.cost = cost;
-	}
-	
-	update() {
+    }
+    
+    update() {
         if (pause % 2 == 0) {
             this.pressrate--;
             if (this.pressrate <= 0) {
@@ -392,65 +431,65 @@ class Pressurizer extends Building {
 }
 
 class Windspire extends Building {
-	constructor(m, n, range, slowdown, cost) {
-		super(m, m, 'Windspire', 11000*(1 + healthBoost), "#333333");
-		this.m = m;
-		this.n = n;
-		this.range = range;
-		this.slowdown = slowdown;
-		this.cost = cost;
-	}
-	
-	update() {	
-	}
+    constructor(m, n, range, slowdown, cost) {
+        super(m, m, 'Windspire', 11000*(1 + healthBoost), "#333333");
+        this.m = m;
+        this.n = n;
+        this.range = range;
+        this.slowdown = slowdown;
+        this.cost = cost;
+    }
+    
+    update() {  
+    }
 }
 
 class Campfire extends Building {
-	constructor(m, n, cost) {
-		super(m, m, 'Campfire', 6500*(1 + healthBoost), "#BB0000");
-		this.m = m;
-		this.n = n;
-		this.cost = cost;
-	}
-	
-	update() {	
-	}
+    constructor(m, n, cost) {
+        super(m, m, 'Campfire', 6500*(1 + healthBoost), "#BB0000");
+        this.m = m;
+        this.n = n;
+        this.cost = cost;
+    }
+    
+    update() {  
+    }
 }
 
 class Magma extends Building {
-	constructor(m, n, cost) {
-		super(m, m, 'Magma', 7500*(1 + healthBoost), "#DD0000");
-		this.m = m;
-		this.n = n;
-		this.cost = cost;
-	}
-	
-	update() {	
-	}
+    constructor(m, n, cost) {
+        super(m, m, 'Magma', 7500*(1 + healthBoost), "#DD0000");
+        this.m = m;
+        this.n = n;
+        this.cost = cost;
+    }
+    
+    update() {  
+    }
 }
 
 class Volcano extends Building {
-	constructor(m, n, cost) {
-		super(m, m, 'Volcano', 8500*(1 + healthBoost), "#FF0000");
-		this.m = m;
-		this.n = n;
-		this.cost = cost;
-	}
-	
-	update() {	
-	}
+    constructor(m, n, cost) {
+        super(m, m, 'Volcano', 8500*(1 + healthBoost), "#FF0000");
+        this.m = m;
+        this.n = n;
+        this.cost = cost;
+    }
+    
+    update() {  
+    }
 }
 
 class Beacon extends Building {
-	constructor(m, n, cost) {
-		super(m, m, 'Beacon', 15000*(1 + healthBoost), "#301934");
-		this.m = m;
-		this.n = n;
-		this.cost = cost;
-	}
-	
-	update() {	
-	}
+    constructor(m, n, cost) {
+        super(m, m, 'Beacon', 15000*(1 + healthBoost), "#301934");
+        this.m = m;
+        this.n = n;
+        this.cost = cost;
+    }
+    
+    update() {  
+    }
 }
 
 class Homestead {
@@ -458,7 +497,7 @@ class Homestead {
         this.x = x;
         this.y = y;
         this.health = health;   
-		this.maxhealth = maxhealth;
+        this.maxhealth = maxhealth;
         this.image = getImage(image);
     }
     
@@ -468,93 +507,93 @@ class Homestead {
 }
 
 class Upgrade {
-	constructor(name, description, cost, nextUpgrade, image, effect) {
-		this.name = name;
-		this.description = description;
-		this.cost = cost;
-		this.nextUpgrade = nextUpgrade;
-		this.image = image;
-		this.effect = effect;
-	}
-	
-	purchaseable() {
-		let purchaseable = true;
-		for (let i = 0; i < 8; i++) {
-			if (resources[i] < this.cost[i]) {
-				purchaseable = false;
-			}
-		}
-		return purchaseable;
-	}
-	
-	purchase() {
-		for (let i = 0; i < 8; i++) {
-			resources[i] -= this.cost[i];
-		}
-	}
-	
-	upgradeValues() { 	
-		if (this.effect == "buffBoost") buffBoost++; 	
-		if (this.effect == "buffDoubleBoost") buffBoost += 2; 	
-		if (this.effect == "globalPower") globalPower++;
-		if (this.effect == "triGlobalPower") globalPower += 3;
-		if (this.effect == "farmBoost") farmBoost++;
-		if (this.effect == "duoBoost") duoBoost++;
-		if (this.effect == "lumberBoost") lumberBoost++;
-		if (this.effect == "healthBoost") {
+    constructor(name, description, cost, nextUpgrade, image, effect) {
+        this.name = name;
+        this.description = description;
+        this.cost = cost;
+        this.nextUpgrade = nextUpgrade;
+        this.image = image;
+        this.effect = effect;
+    }
+    
+    purchaseable() {
+        let purchaseable = true;
+        for (let i = 0; i < 8; i++) {
+            if (resources[i] < this.cost[i]) {
+                purchaseable = false;
+            }
+        }
+        return purchaseable;
+    }
+    
+    purchase() {
+        for (let i = 0; i < 8; i++) {
+            resources[i] -= this.cost[i];
+        }
+    }
+    
+    upgradeValues() {   
+        if (this.effect == "buffBoost") buffBoost++;    
+        if (this.effect == "buffDoubleBoost") buffBoost += 2;   
+        if (this.effect == "globalPower") globalPower++;
+        if (this.effect == "triGlobalPower") globalPower += 3;
+        if (this.effect == "farmBoost") farmBoost++;
+        if (this.effect == "duoBoost") duoBoost++;
+        if (this.effect == "lumberBoost") lumberBoost++;
+        if (this.effect == "healthBoost") {
             healthBoost++;
             reinforcements = new Upgrade("Reinforcements", `All units on screen gain an additional +100% health. You have purchased this upgrade ${healthBoost} times, granting +${100*healthBoost}% health to all units.`, [0, 5000*8**healthBoost, 0, 0, 0, 0, 0, 0], null, `./assets/upgrades/reinforcements${healthBoost%7}.png`, "healthBoost");
             appendUpgrade(reinforcements);
         }
-		if (this.effect == "meditationBoost") meditationBoost++;
-		if (this.effect == "confidenceBoost") confidenceBoost++;
-		if (this.effect == "spireBoost") {
-			spireBoost++;
-			windMultiplier *= 0.8;
-		}
+        if (this.effect == "meditationBoost") meditationBoost++;
+        if (this.effect == "confidenceBoost") confidenceBoost++;
+        if (this.effect == "spireBoost") {
+            spireBoost++;
+            windMultiplier *= 0.8;
+        }
         if (this.effect == "spireWarp") {
-			spireBoost++;
-			windMultiplier *= 0.8;
+            spireBoost++;
+            windMultiplier *= 0.8;
             spireWarped = true;
             sacWindspires();
             homestead.image = getImage("./assets/misc/warpstead.png");
-		}
-		if (this.effect == "foodNerds") foodNerds = 3;
-		if (this.effect == "woodNerds") woodNerds = 3.25;
-		if (this.effect == "stoneNerds") stoneNerds = 3.5;
-		if (this.effect == "copperNerds") copperNerds = 3.75;
-		if (this.effect == "titaniumNerds") titaniumNerds = 4;
-		if (this.effect == "diamondNerds") diamondNerds = 4.5;
-		if (this.effect == "antimatterNerds") antimatterNerds = 5;
-		if (this.effect == "resourceBoostBoost") globalResourceBoost *= 1.1;
-		if (this.effect == "campfirePrestige") campfirePrestige += 1;
+        }
+        if (this.effect == "foodNerds") foodNerds = 3;
+        if (this.effect == "woodNerds") woodNerds = 3.25;
+        if (this.effect == "stoneNerds") stoneNerds = 3.5;
+        if (this.effect == "copperNerds") copperNerds = 3.75;
+        if (this.effect == "titaniumNerds") titaniumNerds = 4;
+        if (this.effect == "diamondNerds") diamondNerds = 4.5;
+        if (this.effect == "antimatterNerds") antimatterNerds = 5;
+        if (this.effect == "resourceBoostBoost") globalResourceBoost *= 1.1;
+        if (this.effect == "campfirePrestige") campfirePrestige += 1;
         if (this.effect == "bm") bm = 0.7;
-		if (this.effect == "pairBoost") pairBoost += 1;
-		if (this.effect == "leechBoost") leechBoost += 1;
+        if (this.effect == "pairBoost") pairBoost += 1;
+        if (this.effect == "leechBoost") leechBoost += 1;
         if (this.effect == "pierceBoost") piercechance += 0.1;
-		if (this.effect == "advance") {
-			advance = true;
-			globalPower += 2;
-		}
-		if (this.effect == "demolition") {
-			enemyStrength *= 1.25;
-			globalPower += 6;
-		}
-		if (this.effect == "rejuv") rejuv = true;
-		if (this.effect == "asc") {
-			asc = true;
-			ascWave = wave;
-		}
-		if (this.effect == "doom") doom = true;
-		if (this.effect == "leaderBoost") leaderBoosted = 1;
-		if (this.effect == "SPGBoost") SPGBoost = true;
-		if (this.effect == "SACBoost") SACBoost = true;
-		if (this.effect == "YACBoost") YACBoost = true;
+        if (this.effect == "advance") {
+            advance = true;
+            globalPower += 2;
+        }
+        if (this.effect == "demolition") {
+            enemyStrength *= 1.25;
+            globalPower += 6;
+        }
+        if (this.effect == "rejuv") rejuv = true;
+        if (this.effect == "asc") {
+            asc = true;
+            ascWave = wave;
+        }
+        if (this.effect == "doom") doom = true;
+        if (this.effect == "leaderBoost") leaderBoosted = 1;
+        if (this.effect == "SPGBoost") SPGBoost = true;
+        if (this.effect == "SACBoost") SACBoost = true;
+        if (this.effect == "YACBoost") YACBoost = true;
         if (this.effect == "LTBoost") LTEff += 4;
         if (this.effect == "expd") leaderEff += 4;
         if (this.effect == "ofb") a4 = true;
         if (this.effect == "psi") chargeStorage = 15;
-		if (this.effect == "uberfarmBoost") {
+        if (this.effect == "uberfarmBoost") {
             ufarmstacks++;
             farmBuff = ufarms[ufarmstacks];
         }
@@ -607,114 +646,144 @@ class Upgrade {
             globalPower++;
         }
         if (this.effect == "b") globalPower += 2;
-	}
+        if (this.effect == "t1") {
+            healps += 10;
+            homesteadmaxhp += 3000;
+			homestead.maxhealth += 3000;
+			homestead.image = getImage("assets/misc/tomb1.png");
+        }
+        if (this.effect == "t2") {
+            healps += 15;
+            homesteadmaxhp += 3000;
+			homestead.maxhealth += 3000;
+			homestead.image = getImage("assets/misc/tomb2.png");
+        }
+        if (this.effect == "t3") {
+            tomblevel = 3;
+            healps += 20;
+            homesteadmaxhp += 3000;
+			homestead.maxhealth += 3000;
+			homestead.image = getImage("assets/misc/tomb3.png");
+        }
+        if (this.effect == "t4") {
+            tomblevel = 4;
+            healps += 25;
+            homesteadmaxhp += 3000;
+			homestead.maxhealth += 3000;
+			homestead.image = getImage("assets/misc/tomb4.png");
+        }
+        if (this.effect == "t5") {
+            tomblevel = 5;
+            healps += 30;
+            homesteadmaxhp += 3000;
+			homestead.maxhealth += 3000;
+			homestead.image = getImage("assets/misc/tomb5.png");
+        }
+		console.log(homestead.image);
+    }
 }
 
 class Ability {
-	constructor(name, description, cost, image) {
-		this.name = name;
-		this.description = description;
-		this.cost = cost;
-		this.image = image;
-	}
-	
-	purchaseable() {
-		if (resources[7] >= this.cost) return true;
-		else return false;
-	}
-	
-	purchase() {
-		resources[7] -= this.cost;
-	}
-	
-	use() {
-		if (this.name == "Cache") {
+    constructor(name, description, cost, image) {
+        this.name = name;
+        this.description = description;
+        this.cost = cost;
+        this.image = image;
+    }
+    
+    purchaseable() {
+        if (resources[7] >= this.cost) return true;
+        else return false;
+    }
+    
+    purchase() {
+        resources[7] -= this.cost;
+    }
+    
+    use() {
+        if (this.name == "Cache") {
             for (let i = 0; i < 7; i++) {
                 resources[i] *= 2;
             }
         } else if (this.name == "Collection") {
-			for (let i = 0; i < 7; i++) {
+            for (let i = 0; i < 7; i++) {
                 resources[i] *= 4;
             }
-		} else if (this.name == "Chill") {
-			chilled = 0.5;
-			chilltime = 1800;
-		} else if (this.name == "Deep Freeze") {
-			chilled = 0.01;
-			chilltime = 2700;
-		} else if (this.name == "Rejuvination") {
-			for (let unit of units) {
-				unit.health = unit.maxhealth;
-			}
-		} else if (this.name == "Reincarnation") {
-			for (let unit of units) {
-				unit.health = unit.maxhealth;
-			}
-			homestead.health = homestead.maxhealth;
-			rnc++;
-		} else if (this.name == "Cosmic Blast") {
-			for (let i = 0; i < enemies.length; i++) {
-				if (i % 6 == 5 && enemies[i].radius < 150) {
+        } else if (this.name == "Chill") {
+            chilled = 0.5;
+            chilltime = 1800;
+        } else if (this.name == "Deep Freeze") {
+            chilled = 0.01;
+            chilltime = 2700;
+        } else if (this.name == "Rejuvination") {
+            for (let unit of units) {
+                unit.health = unit.maxhealth;
+            }
+        } else if (this.name == "Reincarnation") {
+            for (let unit of units) {
+                unit.health = unit.maxhealth;
+            }
+            homestead.health = homestead.maxhealth;
+            rnc++;
+        } else if (this.name == "Cosmic Blast") {
+            for (let i = 0; i < enemies.length; i++) {
+                if (i % 6 == 5 && enemies[i].radius < 150) {
                     enemyDeath(enemies[i]);
                     enemies.splice(i, 1);
                 }
-				else {
-					enemies[i].x = 10000 - enemies[i].x;
-					enemies[i].y = 10000 - enemies[i].y;
-				}
-			}
-		} else if (this.name == "Transgalactic Strike") {
-			for (let i = 0; i < enemies.length; i++) {
-				if (i % 4 != 0 && enemies[i].radius < 150) {
+                else {
+                    enemies[i].x = 10000 - enemies[i].x;
+                    enemies[i].y = 10000 - enemies[i].y;
+                }
+            }
+        } else if (this.name == "Transgalactic Strike") {
+            for (let i = 0; i < enemies.length; i++) {
+                if (i % 4 != 0 && enemies[i].radius < 150) {
                     enemyDeath(enemies[i]);
                     enemies.splice(i, 1);
                 }
-				else {
-					if (enemies[i].x < enemies[i].y) enemies[i].y = 10000;
-					else enemies[i].x = 10000;
-				}
-			}
-		} else if (this.name == "Water Break") {
-			wb = 0.5;
-			wbtime = 3600;
-			wbstacks++;
-		} else if (this.name == "Colloidal Armor") {
-			absp = 90;
-		} else if (this.name == "Force") {
-			fc = 2;
-			fctime = 1800;
-			fcstacks++;
-		} else if (this.name == "Might") {
-			fc = 3;
-			fctime = 3000;
-			mtstacks++;
-		} else if (this.name == "Halt") {
-			ht = 0;
-			httime = 1200;
-			htstacks++;
-		} else if (this.name == "Termination") {
-			ht = 0;
-			httime = 1800;
-			tmstacks++;
+                else {
+                    if (enemies[i].x < enemies[i].y) enemies[i].y = 10000;
+                    else enemies[i].x = 10000;
+                }
+            }
+        } else if (this.name == "Water Break") {
+            wb = 0.5;
+            wbtime = 3600;
+            wbstacks++;
+        } else if (this.name == "Colloidal Armor") {
+            absp = 90;
+        } else if (this.name == "Force") {
+            fc = 2;
+            fctime = 1800;
+            fcstacks++;
+        } else if (this.name == "Might") {
+            fc = 3;
+            fctime = 3000;
+            mtstacks++;
+        } else if (this.name == "Halt") {
+            ht = 0;
+            httime = 1200;
+            htstacks++;
+        } else if (this.name == "Termination") {
+            ht = 0;
+            httime = 1800;
+            tmstacks++;
             enemies.forEach((enemy) => {
                 enemy.x += 1000;
                 enemy.y += 1000;
             })
-		} else if (this.name == "Evaporation") {
-			for (let i = 0; i < 7; i++) {
+        } else if (this.name == "Evaporation") {
+            for (let i = 0; i < 7; i++) {
                 resources[i] = 0;
             }
-			eva++;
-		} else if (this.name == "Vaporization") {
-			for (let i = 0; i < 7; i++) {
+            eva++;
+        } else if (this.name == "Vaporization") {
+            for (let i = 0; i < 7; i++) {
                 resources[i] = 0;
             }
-			eva++;
-			vap++;
-		}
-	}
+            eva++;
+            vap++;
+        }
+    }
 }
-
-
-
-
