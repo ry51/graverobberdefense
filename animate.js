@@ -63,6 +63,7 @@ function animate() {
     });
 
     if (dead == false) {
+        console.log(homestead.image);
         homestead.draw();
         player.update();
     }
