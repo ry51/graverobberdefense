@@ -246,7 +246,7 @@ class Unit extends Building {
         const angle = Math.atan2((target.y + target.velocity.y*enemytime) - this.n*50 + 25, (target.x + target.velocity.x*enemytime) - this.m*50 + 25);
         */
         const angle = Math.atan2(target.y - this.n*50 + 25, target.x- this.m*50 + 25);
-        const velocity = {x:Math.cos(angle)*Math.min(this.range*(1 + 0.2*beaconunits)/40 + wave/2, 50), y:Math.sin(angle)*Math.min(this.range*(1 + 0.2*beaconunits)/40 + + wave/2, 30)};
+        const velocity = {x:Math.cos(angle)*Math.min(this.range*(1 + 0.2*beaconunits)/40 + wave/2, 30), y:Math.sin(angle)*Math.min(this.range*(1 + 0.2*beaconunits)/40 + + wave/2, 30)};
         projectiles.push(new Projectile(this.m*50 - 25, this.n*50 - 25, this.projRadius, "#000000", velocity, 50, pierce, this.damage*this.supportBuffs, target, false));
     }
     
